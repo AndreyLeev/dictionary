@@ -1,22 +1,13 @@
 from rest_framework import serializers
-from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 
 from dictionary.models import Dictionary
+from dictionary.serializers.text import TextSerializer
+from dictionary.serializers.token import TokenSerializer
 
 
 class DictionarySerializer(serializers.HyperlinkedModelSerializer):
-    tokens = NestedHyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='token-detail',
-        parent_lookup_kwargs={'dictionary_pk': 'dictionary__pk'}
-    )
-    texts = NestedHyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='text-detail',
-        parent_lookup_kwargs={'dictionary_pk': 'dictionary__pk'}
-    )
+    tokens = TokenSerializer(many=True, read_only=True)
+    texts = TextSerializer(many=True, read_only=True)
 
     class Meta:
         model = Dictionary
