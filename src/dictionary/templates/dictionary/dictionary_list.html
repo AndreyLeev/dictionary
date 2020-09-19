@@ -1,0 +1,9 @@
+{% if dictionary_list %}
+    <ul>
+    {% for dictionary in dictionary_list %}
+        <li>{{ dictionary.title }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No info yet. Try later</p>
+{% endif %}

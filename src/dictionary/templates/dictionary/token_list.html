@@ -1,0 +1,10 @@
+{% if token_list %}
+    <ul>
+    {% for token in token_list %}
+        <li>{{ token.label }} - {{ token.frequency }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No info yet. Try later</p>
+{% endif %}
+
