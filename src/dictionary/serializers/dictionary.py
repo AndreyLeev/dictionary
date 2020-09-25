@@ -1,13 +1,11 @@
 from rest_framework import serializers
 
 from dictionary.models import Dictionary
-from dictionary.serializers.text import TextSerializer
-from dictionary.serializers.token import TokenSerializer
 
 
 class DictionarySerializer(serializers.HyperlinkedModelSerializer):
-    tokens = TokenSerializer(many=True, read_only=True)
-    texts = TextSerializer(many=True, read_only=True)
+    total_unique_tokens = serializers.IntegerField()
+    total_tokens = serializers.IntegerField()
 
     class Meta:
         model = Dictionary
@@ -18,6 +16,6 @@ class DictionarySerializer(serializers.HyperlinkedModelSerializer):
             'creation_date',
             'description',
 
-            'tokens',
-            'texts',
+            'total_unique_tokens',
+            'total_tokens',
         ]
