@@ -2,7 +2,7 @@ import string
 import logging
 import itertools
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict
 
 from django.db.models import F
 from dictionary.models import Token
@@ -67,6 +67,7 @@ class DictionaryManagementMixin:
 
 
 class TokenDictionaryDAL(DictionaryManagementMixin):
+    # TODO: not N DB request too slow !!!!
 
     @classmethod
     def create_tokens_dictionary_relations(

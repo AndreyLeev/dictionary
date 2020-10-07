@@ -4,8 +4,8 @@ from dictionary.models import Dictionary
 
 
 class DictionarySerializer(serializers.HyperlinkedModelSerializer):
-    total_unique_tokens = serializers.IntegerField()
-    total_tokens = serializers.IntegerField()
+    total_unique_tokens = serializers.IntegerField(read_only=True)
+    total_tokens = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Dictionary
