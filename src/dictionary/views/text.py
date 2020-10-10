@@ -34,10 +34,7 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
     def perform_create(self, serializer):
         dictionary_pk = self.kwargs.get('dictionary_pk')
         instance = serializer.save(dictionary_id=dictionary_pk)
-        self.create_tokens_dictionary_relations(
-            dictionary=instance.dictionary,
-            new_text=instance.text,
-        )
+        self.create_tokens_dictionary_relations(text_obj=instance)
 
     def perform_update(self, serializer):
         dictionary_pk = self.kwargs.get('dictionary_pk')
@@ -46,9 +43,8 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
         instance: Text = serializer.save(dictionary_id=dictionary_pk)
 
         self.update_tokens_dictionary_relations(
-            dictionary=instance.dictionary,
-            new_text=instance.text,
             old_text=text_obj.text,
+            text_obj=instance
         )
 
     def perform_destroy(self, instance: Text):

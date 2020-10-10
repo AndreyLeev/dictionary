@@ -4,7 +4,6 @@ from dictionary.models import Text, Dictionary
 
 
 class TextSerializer(serializers.ModelSerializer):
-    # TODO add token statistic
     dictionary = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
@@ -14,9 +13,13 @@ class TextSerializer(serializers.ModelSerializer):
             'text',
             'title',
             'creation_date',
+            'token_statistics',
 
             'dictionary',
         ]
+        read_only_fields = (
+            'token_statistics',
+        )
 
     def create(self, validated_data):
         dictionary_id = validated_data.pop('dictionary_id')

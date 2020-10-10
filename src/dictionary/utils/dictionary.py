@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Dict
 
 from django.db.models import F
-from dictionary.models import Token
+from dictionary.models import Token, Text
 from django.db import transaction
 
 logger = logging.getLogger(__name__)
@@ -71,15 +71,17 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     @classmethod
     def create_tokens_dictionary_relations(
             cls,
-            dictionary,
-            new_text: str,
+            text_obj: Text,
     ) -> None:
-        new_dictionary_objects = cls.create_dict_from_text(new_text)
+        new_dictionary_objects = cls.create_dict_from_text(text_obj.text)
+
+        text_obj.token_statistics = new_dictionary_objects
+        text_obj.save()
 
         with transaction.atomic():
             for label, frequency in new_dictionary_objects.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
-                    dictionary=dictionary,
+                    dictionary=text_obj.dictionary,
                     label=label,
                 )
                 token_obj.frequency = F('frequency') + frequency
@@ -88,19 +90,21 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     @classmethod
     def update_tokens_dictionary_relations(
             cls,
-            dictionary,
-            new_text: str,
             old_text: str,
+            text_obj: Text,
     ) -> None:
 
-        new_dict = cls.create_dict_from_text(new_text)
-        old_dict = cls.create_dict_from_text(old_text)
+        new_dict = cls.create_dict_from_text(old_text)
+        old_dict = text_obj.token_statistics
         diff_dict = cls.get_dict_diff(old_dict, new_dict)
+
+        text_obj.token_statistics = new_dict
+        text_obj.save()
 
         with transaction.atomic():
             for label, frequency_diff in diff_dict.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
-                    dictionary=dictionary,
+                    dictionary=text_obj.dictionary,
                     label=label,
                 )
                 token_obj.frequency += frequency_diff

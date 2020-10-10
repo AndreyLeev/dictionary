@@ -18,6 +18,8 @@ class Text(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
+    token_statistics = models.JSONField(null=True)
+
     dictionary = models.ForeignKey(
         Dictionary,
         related_name='texts',
