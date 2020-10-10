@@ -6,7 +6,7 @@ from typing import Dict
 
 from django.db.models import F
 from dictionary.models import Token
-
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,6 @@ class DictionaryManagementMixin:
 
 
 class TokenDictionaryDAL(DictionaryManagementMixin):
-    # TODO: not N DB request too slow !!!!
 
     @classmethod
     def create_tokens_dictionary_relations(
@@ -76,13 +75,15 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
             new_text: str,
     ) -> None:
         new_dictionary_objects = cls.create_dict_from_text(new_text)
-        for label, frequency in new_dictionary_objects.items():
-            token_obj, is_created_flag = Token.objects.get_or_create(
-                dictionary=dictionary,
-                label=label,
-            )
-            token_obj.frequency = F('frequency') + frequency
-            token_obj.save()
+
+        with transaction.atomic():
+            for label, frequency in new_dictionary_objects.items():
+                token_obj, is_created_flag = Token.objects.get_or_create(
+                    dictionary=dictionary,
+                    label=label,
+                )
+                token_obj.frequency = F('frequency') + frequency
+                token_obj.save()
 
     @classmethod
     def update_tokens_dictionary_relations(
@@ -96,17 +97,18 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
         old_dict = cls.create_dict_from_text(old_text)
         diff_dict = cls.get_dict_diff(old_dict, new_dict)
 
-        for label, frequency_diff in diff_dict.items():
-            token_obj, is_created_flag = Token.objects.get_or_create(
-                dictionary=dictionary,
-                label=label,
-            )
-            token_obj.frequency += frequency_diff
+        with transaction.atomic():
+            for label, frequency_diff in diff_dict.items():
+                token_obj, is_created_flag = Token.objects.get_or_create(
+                    dictionary=dictionary,
+                    label=label,
+                )
+                token_obj.frequency += frequency_diff
 
-            if not token_obj.frequency:
-                token_obj.delete()
-            else:
-                token_obj.save()
+                if not token_obj.frequency:
+                    token_obj.delete()
+                else:
+                    token_obj.save()
 
     @classmethod
     def delete_tokens_dictionary_relations(
@@ -116,14 +118,15 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     ) -> None:
         old_dict = cls.create_dict_from_text(old_text)
 
-        for label, frequency in old_dict.items():
-            token_obj = Token.objects.get(
-                dictionary=dictionary,
-                label=label,
-            )
-            token_obj.frequency -= frequency
+        with transaction.atomic():
+            for label, frequency in old_dict.items():
+                token_obj = Token.objects.get(
+                    dictionary=dictionary,
+                    label=label,
+                )
+                token_obj.frequency -= frequency
 
-            if not token_obj.frequency:
-                token_obj.delete()
-            else:
-                token_obj.save()
+                if not token_obj.frequency:
+                    token_obj.delete()
+                else:
+                    token_obj.save()
