@@ -1,8 +1,14 @@
+from django.db import IntegrityError
 from rest_framework import viewsets, filters
+from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 
 from dictionary.models import Token
 from dictionary.serializers.token import TokenSerializer
+
+
+class TokenErrors:
+    TOKEN_ALREADY_EXISTS = "Word already exists."
 
 
 class TokenViewSet(viewsets.ModelViewSet):
@@ -31,4 +37,10 @@ class TokenViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         dictionary_pk = self.kwargs.get('dictionary_pk')
-        serializer.save(dictionary_id=dictionary_pk)
+        try:
+            serializer.save(dictionary_id=dictionary_pk)
+        except IntegrityError:
+            raise ValidationError(
+                detail=TokenErrors.TOKEN_ALREADY_EXISTS,
+                code=400,
+            )

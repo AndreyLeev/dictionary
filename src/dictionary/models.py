@@ -42,3 +42,6 @@ class Token(models.Model):
 
     class Meta:
         ordering = ['-frequency']
+        unique_together = (
+            ('label', 'dictionary')
+        )
