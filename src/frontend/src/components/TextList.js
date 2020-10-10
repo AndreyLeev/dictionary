@@ -2,11 +2,9 @@ import React from 'react'
 import MUIDataTable from "mui-datatables";
 import { withRouter, Route, Redirect, Link } from 'react-router-dom';
 
-import TableToolbar from "./common/TableToolbar";
 import { find } from 'lodash';
 import { compose } from 'recompose'
 
-import TextEditor from './TextEditor'
 import {
   withStyles,
   Fab,
@@ -20,6 +18,8 @@ import {
      ArrowForwardIos as ArrowForwardIosIcon
 } from '@material-ui/icons';
 
+import TextEditor from './TextEditor'
+import TableToolbar from "./common/TableToolbar";
 import DictionaryList from './DictionaryList'
 
 
