@@ -7,6 +7,7 @@ import { find } from 'lodash';
 
 import {
      Edit as EditIcon,
+     Delete as DeleteIcon,
 } from '@material-ui/icons';
 import {
   IconButton,
@@ -73,8 +74,8 @@ class TokenList extends React.Component {
       this.getTokens();
   }
 
-   async deleteToken(token) {
-       await this.fetch('delete', `tokens/${token.id}/`);
+   async deleteToken(tokenId) {
+       await this.fetch('delete', `tokens/${tokenId}/`);
        this.getTokens();
     }
 
@@ -114,6 +115,23 @@ class TokenList extends React.Component {
                     >
                     <EditIcon color="primary"/>
                 </IconButton>
+              );
+            }
+          }
+        },
+        {
+          name: "Delete",
+          options: {
+            filter: true,
+            sort: false,
+            empty: true,
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                  <IconButton
+                       onClick={() => this.deleteToken(tableMeta.rowData[0])} color="inherit"
+                       >
+                      <DeleteIcon color="secondary"/>
+                  </IconButton>
               );
             }
           }

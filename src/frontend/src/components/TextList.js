@@ -79,8 +79,8 @@ class TextList extends React.Component {
       this.getTexts();
   }
 
-   async deleteText(text) {
-       await this.fetch('delete', `texts/${text.id}/`);
+   async deleteText(textId) {
+       await this.fetch('delete', `texts/${textId}/`);
        this.getTexts();
     }
 
@@ -119,6 +119,23 @@ class TextList extends React.Component {
                     >
                     <EditIcon color="primary"/>
                 </IconButton>
+              );
+            }
+          }
+        },
+        {
+          name: "Delete",
+          options: {
+            filter: true,
+            sort: false,
+            empty: true,
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                  <IconButton
+                       onClick={() => this.deleteText(tableMeta.rowData[0])} color="inherit"
+                       >
+                      <DeleteIcon color="secondary"/>
+                  </IconButton>
               );
             }
           }
