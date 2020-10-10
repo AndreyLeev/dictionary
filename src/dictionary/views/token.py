@@ -5,7 +5,7 @@ from dictionary.models import Token
 from dictionary.serializers.token import TokenSerializer
 
 
-class TokenViewSet(viewsets.ReadOnlyModelViewSet):
+class TokenViewSet(viewsets.ModelViewSet):
     queryset = Token.objects.all()
     serializer_class = TokenSerializer
     filter_backends = [
@@ -28,3 +28,7 @@ class TokenViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Token.objects.filter(dictionary=self.kwargs['dictionary_pk'])
+
+    def perform_create(self, serializer):
+        dictionary_pk = self.kwargs.get('dictionary_pk')
+        serializer.save(dictionary_id=dictionary_pk)
