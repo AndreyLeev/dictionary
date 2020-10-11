@@ -13,9 +13,7 @@ import {
 
 import {
      Delete as DeleteIcon,
-     Add as AddIcon,
      Edit as EditIcon,
-     ArrowForwardIos as ArrowForwardIosIcon
 } from '@material-ui/icons';
 
 import TextEditor from './TextEditor'
@@ -102,10 +100,40 @@ class TextList extends React.Component {
              display: false,
            }
         },
-        "title",
-        "creation_date",
+        {
+          name: "title",
+          label: "Title",
+        },
+        {
+          name: "creation_date",
+          label: "Creation date",
+          options: {
+            filter: true,
+            sort: true,
+            empty: true,
+            customBodyRender: (value, tableMeta, updateValue) => {
+                console.log(tableMeta.rowData);
+              return (
+                  new Intl.DateTimeFormat("en-GB", {
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit"
+                }).format(new Date(tableMeta.rowData[2]))
+              );
+            }
+          }
+        },
+        {
+          name: "total_tokens",
+          label: "Total 2ords",
+        },
+        {
+          name: "total_unique_tokens",
+          label: "Total unique words",
+        },
         {
           name: "Edit",
+          label: "",
           options: {
             filter: true,
             sort: false,
@@ -125,6 +153,7 @@ class TextList extends React.Component {
         },
         {
           name: "Delete",
+          label: "",
           options: {
             filter: true,
             sort: false,
