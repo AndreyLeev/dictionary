@@ -15,6 +15,9 @@ class TokenSerializer(serializers.ModelSerializer):
 
             'dictionary',
         ]
+        read_only_fields = (
+            'frequency',
+        )
 
     def create(self, validated_data):
         dictionary_id = validated_data.pop('dictionary_id')

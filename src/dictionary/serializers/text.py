@@ -5,6 +5,14 @@ from dictionary.models import Text, Dictionary
 
 class TextSerializer(serializers.ModelSerializer):
     dictionary = serializers.PrimaryKeyRelatedField(read_only=True)
+    total_tokens = serializers.SerializerMethodField(
+        '_total_tokens',
+        read_only=True,
+    )
+    total_unique_tokens = serializers.SerializerMethodField(
+        '_total_unique_tokens',
+        read_only=True,
+    )
 
     class Meta:
         model = Text
@@ -13,13 +21,18 @@ class TextSerializer(serializers.ModelSerializer):
             'text',
             'title',
             'creation_date',
-            'token_statistics',
+
+            'total_unique_tokens',
+            'total_tokens',
 
             'dictionary',
         ]
-        read_only_fields = (
-            'token_statistics',
-        )
+
+    def _total_unique_tokens(self, obj):
+        return len(obj.token_statistics)
+
+    def _total_tokens(self, obj):
+        return sum(obj.token_statistics.values())
 
     def create(self, validated_data):
         dictionary_id = validated_data.pop('dictionary_id')
