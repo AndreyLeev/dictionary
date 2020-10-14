@@ -29,6 +29,7 @@ class TokenList extends React.Component {
         tokens: [],
         errors: null,
     };
+    this.tokenTexts = []
   }
 
   componentDidMount() {
@@ -79,6 +80,26 @@ class TokenList extends React.Component {
        this.getTokens();
     }
 
+    async getTokenTexts(method, token, body) {
+        try {
+          const response = await fetch(
+              `${APP_API}texts/?dict_id=${token.dictionary}&token=${token.label}`,
+            {
+            method,
+            body: body && JSON.stringify(body),
+            headers: {
+              'content-type': 'application/json',
+              accept: 'application/json',
+            },
+          });
+          this.tokenTexts = await response.json() || [];
+        } catch (error) {
+          console.error(error);
+
+          this.setState({ error });
+        }
+    }
+
   renderTokenEditor = ({match}) => {
       const id = match.params.tokenId
       if (this.state.loading) return null;
@@ -86,7 +107,12 @@ class TokenList extends React.Component {
 
       if (!token && id !== 'new') return <Redirect to="/" />;
 
-      return <TokenEditor token={token} onSave={this.saveToken} />;
+      if (id !== 'new'){
+          this.getTokenTexts('get', token)
+      } else {
+          this.tokenTexts = []
+      }
+      return <TokenEditor token={token} tokenTexts={this.tokenTexts} onSave={this.saveToken} />;
     };
 
 

@@ -6,8 +6,6 @@ import { find } from 'lodash';
 import { compose } from 'recompose'
 
 import {
-  withStyles,
-  Fab,
   IconButton,
 } from '@material-ui/core';
 
@@ -18,8 +16,7 @@ import {
 
 import TextEditor from './TextEditor'
 import TableToolbar from "./common/TableToolbar";
-import DictionaryList from './DictionaryList'
-
+import DropFiles from './common/DropZone'
 
 const APP_API = process.env.APP_API || 'http://127.0.0.1:8000/api/';
 
@@ -88,7 +85,6 @@ class TextList extends React.Component {
       const text = find(this.state.texts, { id: Number(id) });
 
       if (!text && id !== 'new') return <Redirect to="/" />;
-
       return <TextEditor text={text} onSave={this.saveText} />;
     };
 
@@ -125,7 +121,7 @@ class TextList extends React.Component {
         },
         {
           name: "total_tokens",
-          label: "Total 2ords",
+          label: "Total words",
         },
         {
           name: "total_unique_tokens",
@@ -185,6 +181,9 @@ class TextList extends React.Component {
     };
     return (
         <div>
+        <div>
+            <DropFiles dictionaryId={this.props.match.params.dictionaryId}/>
+        </div>
             <MUIDataTable
               title={"Texts"}
               data={this.state.texts}
@@ -195,7 +194,7 @@ class TextList extends React.Component {
             path="/dictionary-details/:dictionaryId/texts/:textId"
             render={this.renderTextEditor}
             />
-        </div>
+    </div>
     );
   }
 }

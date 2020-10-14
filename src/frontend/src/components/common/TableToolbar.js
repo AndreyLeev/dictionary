@@ -3,9 +3,8 @@ import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import AddIcon from "@material-ui/icons/Add";
 import { withStyles } from "@material-ui/core/styles";
-import AttachFileIcon from '@material-ui/icons/AttachFile';
 
-import { withRouter, Route, Redirect, Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 
 const defaultToolbarStyles = {

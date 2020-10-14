@@ -39,3 +39,9 @@ class TextSerializer(serializers.ModelSerializer):
         dictionary = Dictionary.objects.get(id=dictionary_id)  # TODO raise 404
         text = Text.objects.create(dictionary=dictionary, **validated_data)
         return text
+
+
+class TokenTextsSerializer(serializers.Serializer):
+    text_id = serializers.IntegerField()
+    text_title = serializers.CharField(max_length=255)
+    token_total = serializers.IntegerField()

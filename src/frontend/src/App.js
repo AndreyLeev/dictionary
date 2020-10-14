@@ -9,6 +9,7 @@ import DictionaryDetail from './components/DictionaryDetail'
 function App() {
   return (
       <Switch>
+          <Route exact path='/' component={DictionaryList}/>
           <Route path='/dictionaries' component={DictionaryList}/>
           <Route path='/dictionary-details/:dictionaryId' component={DictionaryDetail}/>
       </Switch>

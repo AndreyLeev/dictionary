@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from dictionary.models import Token, Dictionary
-from dictionary.serializers.text import TextSerializer
+from dictionary.serializers.text import TokenTextsSerializer
 from dictionary.serializers.token import TokenSerializer
 from dictionary.utils.text import TextManager
 
@@ -56,6 +56,7 @@ class TokenViewSet(viewsets.ModelViewSet, TextManager):
             dictionary_id=self.kwargs.get('dictionary_pk'),
         )
 
+        # TODO move to TextManager mixin
         texts = self.get_token_related_text_objects(
             dictionary=new_instance.dictionary,
             token=old_token_obj.label,
@@ -77,7 +78,7 @@ class TokenViewSet(viewsets.ModelViewSet, TextManager):
             dictionary=instance.dictionary,
             token=instance.label,
         )
-
+        # TODO move to TextManager mixin
         with transaction.atomic():
             for text_obj in texts:
                 text_obj.text = self.delete_token(
@@ -100,7 +101,7 @@ class TokenTextsListView(APIView, TextManager):
     def get(self, request):
         token = request.GET.get('token')
         dict_id = request.GET.get('dict_id')
-
+        # TODO add normal query param validation using generic tools
         if not (token and dict_id):
             raise ValidationError(
                 detail=TokenErrors.INVALID_QUERY_PARAM,
@@ -111,6 +112,17 @@ class TokenTextsListView(APIView, TextManager):
             dictionary=Dictionary.objects.get(id=dict_id),
             token=token,
         )
-        serialized_texts = [TextSerializer(text).data for text in texts]
 
-        return Response(data=serialized_texts)
+        serialized_texts_info = []
+        for text in texts:
+            serializer = TokenTextsSerializer(
+                data=dict(
+                    text_id=text.pk,
+                    text_title=text.title,
+                    token_total=text.token_statistics.get(token),
+                )
+            )
+            serializer.is_valid()
+            serialized_texts_info.append(serializer.validated_data)
+
+        return Response(data=serialized_texts_info)

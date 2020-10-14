@@ -1,7 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from dictionary.models import Text
+from dictionary.models import Text, Dictionary
 from dictionary.serializers.text import TextSerializer
 from dictionary.utils.dictionary import TokenDictionaryDAL
 
@@ -43,7 +46,6 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
         instance: Text = serializer.save(dictionary_id=dictionary_pk)
 
         self.update_tokens_dictionary_relations(
-            old_text=text_obj.text,
             text_obj=instance
         )
 
@@ -53,3 +55,18 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
             old_text=instance.text,
         )
         instance.delete()
+
+
+class TextFileUploaderView(APIView, TokenDictionaryDAL):
+
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        uploaded_file = request.data.get('file')
+        text_obj = Text.objects.create(
+            text=uploaded_file.read().decode(),
+            title=uploaded_file.name,
+            dictionary=Dictionary.objects.get(pk=kwargs.get('dict_id'))
+        )
+        self.create_tokens_dictionary_relations(text_obj)
+        return Response()

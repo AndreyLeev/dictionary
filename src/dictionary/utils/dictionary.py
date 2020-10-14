@@ -90,11 +90,10 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     @classmethod
     def update_tokens_dictionary_relations(
             cls,
-            old_text: str,
             text_obj: Text,
     ) -> None:
 
-        new_dict = cls.create_dict_from_text(old_text)
+        new_dict = cls.create_dict_from_text(text_obj.text)
         old_dict = text_obj.token_statistics
         diff_dict = cls.get_dict_diff(old_dict, new_dict)
 

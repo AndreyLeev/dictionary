@@ -6,7 +6,7 @@ from dictionary.models import Dictionary
 class DictionarySerializer(serializers.HyperlinkedModelSerializer):
     total_unique_tokens = serializers.IntegerField(read_only=True)
     total_tokens = serializers.IntegerField(read_only=True)
-
+    # TODO add text count field
     class Meta:
         model = Dictionary
         fields = [
