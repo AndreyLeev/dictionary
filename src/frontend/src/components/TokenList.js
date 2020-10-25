@@ -178,7 +178,7 @@ class TokenList extends React.Component {
     return (
         <div>
             <MUIDataTable
-              title={"Tokens"}
+              title={"Words"}
               data={this.state.tokens}
               columns={columns}
               options={options}

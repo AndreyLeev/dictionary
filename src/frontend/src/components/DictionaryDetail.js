@@ -4,6 +4,7 @@ import { Tabs, Tab } from '@material-ui/core'
 import Common from './common/Common'
 import TokenList from './TokenList'
 import TextList from './TextList'
+import TagHelp from './TagHelp'
 
 const TabPanel = ({value, index, children}) => (
   <div>{value === index && children}</div>
@@ -25,13 +26,17 @@ export default function(props) {
 	centered
       >
 	<Tab label='Texts' />
-	<Tab label='Tokens' />
+	<Tab label='Words' />
+    <Tab label='Tag help' />
       </Tabs>
       <TabPanel value={value} index={0}  >
           <TextList match={props.match}/>
       </TabPanel>
       <TabPanel value={value} index={1} >
           <TokenList match={props.match}/>
+      </TabPanel>
+      <TabPanel value={value} index={2} >
+          <TagHelp />
       </TabPanel>
     </Common>
   )
