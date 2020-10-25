@@ -126,6 +126,7 @@ class TokenList extends React.Component {
         },
         "label",
         "frequency",
+        "tag",
         {
           name: "Edit",
           options: {

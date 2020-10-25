@@ -17,6 +17,7 @@ class Dictionary(models.Model):
 class Text(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
+    tagged_text = models.TextField()
     creation_date = models.DateTimeField(auto_now_add=True)
     token_statistics = models.JSONField(null=True)
 
@@ -33,6 +34,7 @@ class Text(models.Model):
 class Token(models.Model):
     label = models.CharField(max_length=255)
     frequency = models.BigIntegerField(default=0)
+    tag = models.CharField(max_length=255)
     dictionary = models.ForeignKey(
         Dictionary,
         related_name='tokens',

@@ -1,6 +1,7 @@
 import string
 import logging
 import itertools
+import nltk
 from collections import defaultdict
 from typing import Dict
 
@@ -20,7 +21,7 @@ class DictionaryManagementMixin:
     def create_dict_from_text(cls, text: str) -> Dict[str, int]:
         dictionary = defaultdict(lambda: 0)
 
-        for token in text.split():
+        for token in nltk.word_tokenize(text):
             cleaned_token = cls.serialize_token(token)
 
             try:
@@ -78,11 +79,14 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
         text_obj.token_statistics = new_dictionary_objects
         text_obj.save()
 
+        tagged_words_dict = dict(nltk.pos_tag(new_dictionary_objects.keys()))
+
         with transaction.atomic():
             for label, frequency in new_dictionary_objects.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
+                    tag=tagged_words_dict.get(label)
                 )
                 token_obj.frequency = F('frequency') + frequency
                 token_obj.save()
@@ -100,11 +104,13 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
         text_obj.token_statistics = new_dict
         text_obj.save()
 
+        tagged_words_dict = dict(nltk.pos_tag(diff_dict.keys()))
         with transaction.atomic():
             for label, frequency_diff in diff_dict.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
+                    tag=tagged_words_dict.get(label)
                 )
                 token_obj.frequency += frequency_diff
 

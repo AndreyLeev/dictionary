@@ -12,6 +12,7 @@ class TokenSerializer(serializers.ModelSerializer):
             'id',
             'label',
             'frequency',
+            'tag',
 
             'dictionary',
         ]
