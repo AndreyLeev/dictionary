@@ -3,7 +3,7 @@ import logging
 import itertools
 import nltk
 from collections import defaultdict
-from typing import Dict
+from typing import Dict, Optional
 
 from django.db.models import F
 from dictionary.models import Token, Text
@@ -73,21 +73,23 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     def create_tokens_dictionary_relations(
             cls,
             text_obj: Text,
+            tagged_words_dict: Optional[Dict] = None,
     ) -> None:
         new_dictionary_objects = cls.create_dict_from_text(text_obj.text)
 
+        if not tagged_words_dict:
+            tagged_words_dict = dict(nltk.pos_tag(new_dictionary_objects.keys()))
+
         text_obj.token_statistics = new_dictionary_objects
         text_obj.save()
-
-        tagged_words_dict = dict(nltk.pos_tag(new_dictionary_objects.keys()))
 
         with transaction.atomic():
             for label, frequency in new_dictionary_objects.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
-                    tag=tagged_words_dict.get(label)
                 )
+                token_obj.tag = tagged_words_dict.get(label)
                 token_obj.frequency = F('frequency') + frequency
                 token_obj.save()
 
@@ -95,23 +97,28 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     def update_tokens_dictionary_relations(
             cls,
             text_obj: Text,
+            tagged_words_dict: Optional[Dict] = None,
     ) -> None:
 
         new_dict = cls.create_dict_from_text(text_obj.text)
         old_dict = text_obj.token_statistics
         diff_dict = cls.get_dict_diff(old_dict, new_dict)
 
+        if not tagged_words_dict:
+            tagged_words_dict = dict(nltk.pos_tag(new_dict.keys()))
+        else:
+            diff_dict = new_dict
+
         text_obj.token_statistics = new_dict
         text_obj.save()
 
-        tagged_words_dict = dict(nltk.pos_tag(diff_dict.keys()))
         with transaction.atomic():
             for label, frequency_diff in diff_dict.items():
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
-                    tag=tagged_words_dict.get(label)
                 )
+                token_obj.tag = tagged_words_dict.get(label)
                 token_obj.frequency += frequency_diff
 
                 if not token_obj.frequency:

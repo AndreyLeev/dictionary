@@ -19,6 +19,7 @@ class TextSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'text',
+            'tagged_text',
             'title',
             'creation_date',
 
@@ -27,6 +28,10 @@ class TextSerializer(serializers.ModelSerializer):
 
             'dictionary',
         ]
+        extra_kwargs = {
+            'text': {'required': False},
+            'tagged_text': {'required': False},
+        }
 
     def _total_unique_tokens(self, obj):
         return len(obj.token_statistics)
