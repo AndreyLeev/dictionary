@@ -64,3 +64,19 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ['code']
+
+def transform(data):
+    return [
+        {
+            "model": "dictionary.tag",
+            "pk": index,
+            "fields": {
+              "code": item['title'].split(":")[0],
+              "title": item['title'].split(":")[1],
+              "description": item['help']
+            }
+        }
+        for index, item in enumerate(data)
+    ]
+
+
