@@ -22,7 +22,7 @@ class Text(models.Model):
     token_statistics = models.JSONField(null=True)
 
     dictionary = models.ForeignKey(
-        Dictionary,
+        'Dictionary',
         related_name='texts',
         on_delete=models.CASCADE,
     )
@@ -34,9 +34,12 @@ class Text(models.Model):
 class Token(models.Model):
     label = models.CharField(max_length=255)
     frequency = models.BigIntegerField(default=0)
-    tag = models.CharField(max_length=255)
+    tags = models.ManyToManyField(
+        'Tag',
+        related_name='tokens',
+    )
     dictionary = models.ForeignKey(
-        Dictionary,
+        'Dictionary',
         related_name='tokens',
         on_delete=models.CASCADE,
     )
@@ -49,3 +52,15 @@ class Token(models.Model):
         unique_together = (
             ('label', 'dictionary')
         )
+
+
+class Tag(models.Model):
+    code = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"{self.code} -- {self.title}"
+
+    class Meta:
+        ordering = ['code']
