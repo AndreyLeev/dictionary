@@ -2,11 +2,13 @@ from django.urls import re_path, include, path
 from rest_framework_nested import routers
 
 from dictionary.views.dictionary import DictionaryViewSet
+from dictionary.views.tag import TagViewSet
 from dictionary.views.text import TextViewSet, TextFileUploaderView
 from dictionary.views.token import TokenViewSet, TokenTextsListView
 
 router = routers.SimpleRouter()
 router.register('dictionaries', DictionaryViewSet)
+router.register('tags', TagViewSet)
 
 
 dictionaries_router = routers.NestedSimpleRouter(
