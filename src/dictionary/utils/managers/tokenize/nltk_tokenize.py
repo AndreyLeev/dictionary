@@ -2,7 +2,7 @@ from typing import List
 
 import nltk
 
-from dictionary.utils.tokenize.common import BaseTokenizeManager
+from dictionary.utils.managers.tokenize.common import BaseTokenizeManager
 
 
 class NLTKTokenizeManager(BaseTokenizeManager):

@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 from dictionary.models import Text, Dictionary
 from dictionary.serializers.text import TextSerializer
 from dictionary.utils.dictionary import TokenDictionaryDAL
-from dictionary.utils.tags import TaggedTextManager
+from dictionary.utils.managers.managers import ParsingManagersMixin
 
 
-class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
+class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL, ParsingManagersMixin):
     queryset = Text.objects.all()
     serializer_class = TextSerializer
     filter_backends = [
@@ -35,42 +35,32 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
     def get_queryset(self):
         return Text.objects.filter(dictionary=self.kwargs['dictionary_pk'])
 
+    def _process_tagged_and_plain_text(self, validated_data: dict) -> (str, str):
+        tagging_manager = self.get_tagging_manager()
+
+        is_tagged_text_updated = validated_data.get('is_tagged_text')
+        if is_tagged_text_updated:
+            tagged_text = validated_data.get('tagged_text')
+            text = tagging_manager.get_plain_text_from_tagged_text(tagged_text)
+        else:
+            text = validated_data.get('text')
+            tagged_text = tagging_manager.get_tagged_text_from_plain_text(text)
+
+        return text, tagged_text
+
     def perform_create(self, serializer: TextSerializer):
-        tagged_text = serializer.initial_data.get('tagged_text')
-        text = serializer.initial_data.get('text')
+        text, tagged_text = self._process_tagged_and_plain_text(serializer.validated_data)
 
-        tagged_words_dict = None
-        if tagged_text:
-            text = TaggedTextManager.get_plain_text_from_tagged_text(tagged_text)
-            tagged_words_dict = TaggedTextManager.get_tag_dict_from_tagged_text(tagged_text)
-        elif text:
-            tagged_text = TaggedTextManager.get_tagged_text(text)
-
-        dictionary_pk = self.kwargs.get('dictionary_pk')
         instance = serializer.save(
-            dictionary_id=dictionary_pk,
+            dictionary_id=self.kwargs.get('dictionary_pk'),
             text=text,
             tagged_text=tagged_text,
         )
-        self.create_tokens_dictionary_relations(
-            text_obj=instance,
-            tagged_words_dict=tagged_words_dict,
-        )
+        self.create_tokens_dictionary_relations(text_obj=instance)
 
     def perform_update(self, serializer):
         dictionary_pk = self.kwargs.get('dictionary_pk')
-
-        tagged_text = serializer.initial_data.get('tagged_text')
-        text = serializer.initial_data.get('text')
-
-        tagged_words_dict = None
-
-        # TODO: introduce mode parameter to indicate tagged or plain text
-        if tagged_text:
-            text = TaggedTextManager.get_plain_text_from_tagged_text(tagged_text)
-            tagged_words_dict = TaggedTextManager.get_tag_dict_from_tagged_text(tagged_text)
-        elif text:
-            tagged_text = TaggedTextManager.get_tagged_text(text)
+        text, tagged_text = self._process_tagged_and_plain_text(serializer.validated_data)
 
         instance: Text = serializer.save(
             dictionary_id=dictionary_pk,
@@ -78,10 +68,7 @@ class TextViewSet(viewsets.ModelViewSet, TokenDictionaryDAL):
             tagged_text=tagged_text,
         )
 
-        self.update_tokens_dictionary_relations(
-            text_obj=instance,
-            tagged_words_dict=tagged_words_dict,
-        )
+        self.update_tokens_dictionary_relations(text_obj=instance)
 
     def perform_destroy(self, instance: Text):
         self.delete_tokens_dictionary_relations(

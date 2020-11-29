@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import Optional, Dict, List
+from typing import Dict, List
 
 import nltk
 
 from dictionary.utils.constants import TaggedTextTagsWordsDelimiter
-from dictionary.utils.tagging.common import BaseTaggingManager
+from dictionary.utils.managers.tagging.common import BaseTaggingManager
 
 
 class NLTKTaggingManager(BaseTaggingManager):

@@ -8,6 +8,7 @@ import {
 } from '@material-ui/core';
 
 
+// TODO: use BE endpoint to retrive info about tags
 const info = [
     {
         'title': 'CC: conjunction, coordinating',

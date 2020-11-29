@@ -1,33 +1,36 @@
 import string
 import logging
 import itertools
-import nltk
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict
 
 from django.db.models import F
-from dictionary.models import Token, Text
+from dictionary.models import Token, Text, Tag
 from django.db import transaction
+
+from dictionary.utils.managers.managers import ParsingManagersMixin
 
 logger = logging.getLogger(__name__)
 
 
-class DictionaryManagementMixin:
+class DictionaryManagementMixin(ParsingManagersMixin):
 
     class Errors:
         TOKEN_IS_NOT_ALPHABETIC = "Not all the characters in the word are alphabetic"
 
     @classmethod
     def create_dict_from_text(cls, text: str) -> Dict[str, int]:
-        dictionary = defaultdict(lambda: 0)
+        tokenize_manager = cls.get_tokenize_manager()
 
-        for token in nltk.word_tokenize(text):
+        dictionary = defaultdict(lambda: 0)
+        for token in tokenize_manager.tokenize_text(text):
             cleaned_token = cls.serialize_token(token)
 
             try:
                 cls.validate_token(cleaned_token)
             except ValueError:
                 # just skip broken word
+                logger.debug(f'Invalid token: {cleaned_token}')
                 continue
 
             dictionary[cleaned_token] += 1
@@ -67,19 +70,32 @@ class DictionaryManagementMixin:
         return token
 
 
-class TokenDictionaryDAL(DictionaryManagementMixin):
+class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
+
+    @classmethod
+    def _update_tokens_tags_relations(
+            cls,
+            token_obj: Token,
+            tagged_words_dict: dict,
+    ) -> None:
+        # TODO: find a better solution to update tags of word
+        #  without performing many extra DB queries
+        new_tags_titles = tagged_words_dict.get(token_obj.label, [])
+        existing_tags_titles = token_obj.tags.values_list('title', flat=True) or []
+        current_tags_titles = {*new_tags_titles, *existing_tags_titles}
+        current_tags = Tag.objects.filter(code__in=current_tags_titles)
+        token_obj.tags.clear()
+        token_obj.tags.add(*current_tags)
 
     @classmethod
     def create_tokens_dictionary_relations(
             cls,
             text_obj: Text,
-            tagged_words_dict: Optional[Dict] = None,
     ) -> None:
+        tagging_manager = cls.get_tagging_manager()
+        tagged_words_dict = tagging_manager.get_tags_dict_from_text(text_obj.text)
+
         new_dictionary_objects = cls.create_dict_from_text(text_obj.text)
-
-        if not tagged_words_dict:
-            tagged_words_dict = dict(nltk.pos_tag(new_dictionary_objects.keys()))
-
         text_obj.token_statistics = new_dictionary_objects
         text_obj.save()
 
@@ -89,7 +105,12 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
                     dictionary=text_obj.dictionary,
                     label=label,
                 )
-                token_obj.tag = tagged_words_dict.get(label)
+
+                cls._update_tokens_tags_relations(
+                    token_obj=token_obj,
+                    tagged_words_dict=tagged_words_dict,
+                )
+
                 token_obj.frequency = F('frequency') + frequency
                 token_obj.save()
 
@@ -97,17 +118,13 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
     def update_tokens_dictionary_relations(
             cls,
             text_obj: Text,
-            tagged_words_dict: Optional[Dict] = None,
     ) -> None:
+        tagging_manager = cls.get_tagging_manager()
+        tagged_words_dict = tagging_manager.get_tags_dict_from_text(text_obj.text)
 
         new_dict = cls.create_dict_from_text(text_obj.text)
         old_dict = text_obj.token_statistics
         diff_dict = cls.get_dict_diff(old_dict, new_dict)
-
-        if not tagged_words_dict:
-            tagged_words_dict = dict(nltk.pos_tag(new_dict.keys()))
-        else:
-            diff_dict = new_dict
 
         text_obj.token_statistics = new_dict
         text_obj.save()
@@ -118,9 +135,12 @@ class TokenDictionaryDAL(DictionaryManagementMixin):
                     dictionary=text_obj.dictionary,
                     label=label,
                 )
-                token_obj.tag = tagged_words_dict.get(label)
-                token_obj.frequency += frequency_diff
+                cls._update_tokens_tags_relations(
+                    token_obj=token_obj,
+                    tagged_words_dict=tagged_words_dict,
+                )
 
+                token_obj.frequency += frequency_diff
                 if not token_obj.frequency:
                     token_obj.delete()
                 else:

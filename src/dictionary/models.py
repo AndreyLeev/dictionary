@@ -60,7 +60,7 @@ class Tag(models.Model):
     examples = models.TextField()
 
     def __str__(self):
-        return f"{self.code} -- {self.title}"
+        return f"{self.code}"
 
     class Meta:
         ordering = ['code']

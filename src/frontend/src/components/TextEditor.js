@@ -33,6 +33,10 @@ const styles = theme => ({
   },
 });
 
+
+// TODO add is_tagged_text boolean flag to payload
+
+
 class TextEditor extends React.Component {
     constructor(props){
         super(props);
@@ -90,16 +94,16 @@ class TextEditor extends React.Component {
                         <Button size="small" color="primary" type="submit">Save</Button>
                         <Button size="small" onClick={() => this.props.history.goBack()}>Cancel</Button>
                         <FormControlLabel
-                            control={
-                                <Switch
-                                 checked={this.state.tagged_text}
-                                 onChange={this.handleTextTypeInputChange}
-                                 name="checkedA"
-                                 inputProps={{ 'aria-label': 'secondary checkbox' }}
-                               />
-                            }
-                            label="Tagged Text"
-                          />
+                        control={
+                            <Switch
+                             checked={this.state.tagged_text}
+                             onChange={this.handleTextTypeInputChange}
+                             name="checkedA"
+                             inputProps={{ 'aria-label': 'secondary checkbox' }}
+                           />
+                        }
+                        label="Tagged Text"
+                      />
                       </CardActions>
                     </form>
                   </Card>
