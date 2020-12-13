@@ -59,8 +59,8 @@ const TokenEditor = ({ classes, token, onSave, history, tokenTexts }) => (
               <Field name="label">
                 {({ input }) => <TextField label="Label" autoFocus {...input} />}
               </Field>
-              <Field name="tag">
-                {({ input }) => <TextField label="Tag" autoFocus {...input} />}
+              <Field name="tags">
+                {({ input }) => <TextField label="Tags" autoFocus {...input} />}
               </Field>
               <div>
                   <Typography variant="h6" className={classes.title}>

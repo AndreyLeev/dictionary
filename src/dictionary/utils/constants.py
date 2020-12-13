@@ -10,3 +10,7 @@ class TaggingManagerType:
 
 class TokenizeManagerType:
     NLTK = 'nltk'
+
+
+class LemmaManagerType:
+    NLTK = 'nltk'

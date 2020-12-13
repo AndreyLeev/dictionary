@@ -43,6 +43,11 @@ class Token(models.Model):
         related_name='tokens',
         on_delete=models.CASCADE,
     )
+    lemma = models.OneToOneField(
+        'Lemma',
+        related_name='token',
+        on_delete=models.CASCADE,
+    )
 
     def __str__(self):
         return f"{self.label}"
@@ -52,6 +57,21 @@ class Token(models.Model):
         unique_together = (
             ('label', 'dictionary')
         )
+
+
+class Lemma(models.Model):
+    """
+    Store the base form of the token
+    """
+    label = models.CharField(max_length=255)
+    tag = models.ForeignKey(
+        'Tag',
+        related_name='lemmas',
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return f"{self.label} - {self.tag}"
 
 
 class Tag(models.Model):

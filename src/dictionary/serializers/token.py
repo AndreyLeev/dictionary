@@ -6,6 +6,7 @@ from dictionary.models import Token, Dictionary
 class TokenSerializer(serializers.ModelSerializer):
     dictionary = serializers.PrimaryKeyRelatedField(read_only=True)
     tags = serializers.StringRelatedField(many=True)
+    lemma = serializers.StringRelatedField(many=False, read_only=True)
 
     class Meta:
         model = Token
@@ -14,7 +15,7 @@ class TokenSerializer(serializers.ModelSerializer):
             'label',
             'frequency',
             'tags',
-
+            'lemma',
             'dictionary',
         ]
         read_only_fields = (

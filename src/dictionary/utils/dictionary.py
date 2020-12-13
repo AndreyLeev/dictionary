@@ -99,11 +99,17 @@ class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
         text_obj.token_statistics = new_dictionary_objects
         text_obj.save()
 
+        lemma_manager = cls.get_lemma_manager()
+
         with transaction.atomic():
             for label, frequency in new_dictionary_objects.items():
+
+                lemma = lemma_manager.get_lemma_from_token(label)
+
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
+                    lemma=lemma
                 )
 
                 cls._update_tokens_tags_relations(
@@ -129,11 +135,17 @@ class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
         text_obj.token_statistics = new_dict
         text_obj.save()
 
+        lemma_manager = cls.get_lemma_manager()
+
         with transaction.atomic():
             for label, frequency_diff in diff_dict.items():
+
+                lemma = lemma_manager.get_lemma_from_token(label)
+
                 token_obj, is_created_flag = Token.objects.get_or_create(
                     dictionary=text_obj.dictionary,
                     label=label,
+                    lemma=lemma,
                 )
                 cls._update_tokens_tags_relations(
                     token_obj=token_obj,
