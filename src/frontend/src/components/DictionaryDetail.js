@@ -5,6 +5,8 @@ import Common from './common/Common'
 import TokenList from './TokenList'
 import TextList from './TextList'
 import TagsHelpList from './TagsHelpList'
+import TagTagList from './TagTagList'
+import TagWordList from './TagWordList'
 
 const TabPanel = ({value, index, children}) => (
   <div>{value === index && children}</div>
@@ -28,6 +30,8 @@ export default function(props) {
 	<Tab label='Texts' />
 	<Tab label='Words' />
     <Tab label='Tag help' />
+    <Tab label='Tags Pairs' />
+    <Tab label='Tag Word Pairs' />
       </Tabs>
       <TabPanel value={value} index={0}  >
           <TextList match={props.match}/>
@@ -37,6 +41,12 @@ export default function(props) {
       </TabPanel>
       <TabPanel value={value} index={2} >
           <TagsHelpList match={props.match}/>
+      </TabPanel>
+      <TabPanel value={value} index={3} >
+          <TagTagList match={props.match}/>
+      </TabPanel>
+      <TabPanel value={value} index={4} >
+          <TagWordList match={props.match}/>
       </TabPanel>
     </Common>
   )

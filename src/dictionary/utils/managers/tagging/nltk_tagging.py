@@ -73,3 +73,22 @@ class NLTKTaggingManager(BaseTaggingManager):
             tags_dict[word].append(tag)
 
         return tags_dict
+
+    @classmethod
+    def get_tags_pair_from_tagged_text(
+            cls,
+            tagged_text: str
+    ) -> list:
+        delimiter = cls.get_delimiter()
+        tags_pair = []
+        tagged_text_list = tagged_text.split()
+
+        for i in range(1, len(tagged_text_list)):
+            tags_pair.append(
+                (
+                    tagged_text_list[i-1].split(delimiter)[1],
+                    tagged_text_list[i].split(delimiter)[1]
+                ),
+            )
+
+        return tags_pair
