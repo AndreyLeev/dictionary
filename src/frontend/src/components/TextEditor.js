@@ -52,7 +52,9 @@ class TextEditor extends React.Component {
 
     render() {
         return(
-            <Form initialValues={this.props.text} onSubmit={this.props.onSave}>
+            <Form initialValues={this.props.text} onSubmit={this.props.onSave(
+                    {"is_tagged_text": this.state.tagged_text}
+                )}>
               {({ handleSubmit }) => (
                 <Modal
                   className={this.props.classes.modal}

@@ -63,11 +63,12 @@ class TextList extends React.Component {
           });
     }
 
-   saveText = async (text) => {
+   saveText = (tagged_text) => async (text) => {
+      let paylaod = Object.assign({}, text, tagged_text);
       if (text.id) {
-        await this.fetch('put', `texts/${text.id}/`, text);
+        await this.fetch('put', `texts/${text.id}/`, paylaod);
       } else {
-        await this.fetch('post', 'texts/', text);
+        await this.fetch('post', 'texts/', paylaod);
       }
 
       this.props.history.goBack();

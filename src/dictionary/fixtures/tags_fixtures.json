@@ -1,15 +1,6 @@
 [
   {
     "model": "dictionary.tag",
-    "pk": 0,
-    "fields": {
-      "code": "CC",
-      "title": "conjunction, coordinating",
-      "examples": "& 'n and both but either et for less minus neither nor or plus so therefore times v. versus vs. whether yet"
-    }
-  },
-  {
-    "model": "dictionary.tag",
     "pk": 1,
     "fields": {
       "code": "CD",
@@ -293,6 +284,15 @@
       "code": "WRB",
       "title": "Wh-adverb",
       "examples": "how however whence whenever where whereby whereever wherein whereof why"
+    }
+  },
+    {
+    "model": "dictionary.tag",
+    "pk": 33,
+    "fields": {
+      "code": "WP$",
+      "title": "Possessive wh-pronoun",
+      "examples": "which whose whom whosoever"
     }
   }
 ]

@@ -1,3 +1,4 @@
+import string
 from collections import defaultdict
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -57,6 +58,7 @@ class TagTagViewSet(viewsets.ModelViewSet, ParsingManagersMixin):
                 'frequency': value,
             }
             for key, value in tags_pair_statistic.items()
+            if not (key[0] in string.punctuation or key[1] in string.punctuation)  # TODO fix this workaround
         ]
 
         return res

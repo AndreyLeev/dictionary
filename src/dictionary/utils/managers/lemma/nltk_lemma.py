@@ -19,7 +19,12 @@ class NLTKLemmaManager(BaseLemmaManager):
         nltk_tags = nltk.pos_tag([lemma_label])
         tag_code = nltk_tags[0][1]
 
-        tag_obj = Tag.objects.get(code=tag_code)
+        try:
+            tag_obj = Tag.objects.get(code=tag_code)
+        except:
+            print("*" * 30)
+            print(tag_code)
+            print(lemma_label)
 
         lemma = Lemma(
             label=lemma_label,

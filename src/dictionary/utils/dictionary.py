@@ -4,6 +4,7 @@ import itertools
 from collections import defaultdict
 from typing import Dict
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 from dictionary.models import Token, Text, Tag
 from django.db import transaction
@@ -106,11 +107,14 @@ class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
 
                 lemma = lemma_manager.get_lemma_from_token(label)
 
-                token_obj, is_created_flag = Token.objects.get_or_create(
-                    dictionary=text_obj.dictionary,
-                    label=label,
-                    lemma=lemma
-                )
+                try:
+                    token_obj, is_created_flag = Token.objects.get_or_create(
+                        dictionary=text_obj.dictionary,
+                        label=label,
+                        lemma=lemma
+                    )
+                except:     # TODO fix
+                    continue
 
                 cls._update_tokens_tags_relations(
                     token_obj=token_obj,
@@ -142,11 +146,19 @@ class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
 
                 lemma = lemma_manager.get_lemma_from_token(label)
 
-                token_obj, is_created_flag = Token.objects.get_or_create(
-                    dictionary=text_obj.dictionary,
-                    label=label,
-                    lemma=lemma,
-                )
+                #  TODO fix
+                #  django.db.utils.IntegrityError:
+                #  UNIQUE constraint failed: dictionary_token.label, dictionary_token.dictionary_id
+                #  get_or_create is not the best solution, because of different lemma
+                try:
+                    token_obj, is_created_flag = Token.objects.get_or_create(
+                        dictionary=text_obj.dictionary,
+                        label=label,
+                        lemma=lemma,
+                    )
+                except:
+                    continue
+
                 cls._update_tokens_tags_relations(
                     token_obj=token_obj,
                     tagged_words_dict=tagged_words_dict,
@@ -168,10 +180,14 @@ class TokenDictionaryDAL(DictionaryManagementMixin, ParsingManagersMixin):
 
         with transaction.atomic():
             for label, frequency in old_dict.items():
-                token_obj = Token.objects.get(
-                    dictionary=dictionary,
-                    label=label,
-                )
+                try:
+                    token_obj = Token.objects.get(
+                        dictionary=dictionary,
+                        label=label,
+                    )
+                except ObjectDoesNotExist:
+                    continue
+
                 token_obj.frequency -= frequency
 
                 if not token_obj.frequency:
